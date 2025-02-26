@@ -1,128 +1,160 @@
-<?php
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}"
+      x-data="{ 
+          sidebarOpen: true,
+          darkMode: localStorage.getItem('darkMode') === 'true',
+          toggleSidebar() { this.sidebarOpen = !this.sidebarOpen },
+          toggleDarkMode() {
+              this.darkMode = !this.darkMode;
+              localStorage.setItem('darkMode', this.darkMode);
+              document.documentElement.classList.toggle('dark');
+          }
+      }"
+      :class="{ 'dark': darkMode }">
 
-namespace App\Http\Livewire;
-
-use App\Livewire\Actions\Logout;
-use Livewire\Volt\Component;
-
-new class extends Component
-{
-    /**
-     * Log the current user out of the application.
-     */
-    public function logout(Logout $logout): void
-    {
-        $logout(); // Memanggil __invoke() pada kelas Logout
-
-        // Redirect ke halaman home atau login setelah logout
-         $this->redirect('/');
-    }
-
-    
-}; ?>
 <head>
-    <style>[x-cloak] { display: none !important; }</style>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>@yield('title', 'Dashboard - TIMVANZ')</title>
+    <!-- Sertakan styles dan script sesuai kebutuhan, misalnya: -->
+    {{-- @vite(['resources/css/app.css', 'resources/js/app.js']) --}}
+    {{-- @livewireStyles --}}
+    <script src="//unpkg.com/alpinejs" defer></script>
 </head>
-<nav x-data="{ open: false }" class="bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
-    <!-- Primary Navigation Menu -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16">
-            <div class="flex">
+
+<body class="font-sans antialiased bg-white dark:bg-gray-900">
+    <div class="flex min-h-screen">
+        <!-- SIDEBAR -->
+        <aside class="fixed inset-y-0 left-0 z-50 flex flex-col transition-all duration-300
+                      bg-gradient-to-b from-blue-600 to-blue-800 dark:from-gray-800 dark:to-gray-900
+                      text-white"
+               :class="sidebarOpen ? 'w-64' : 'w-20'">
+
+            <div class="flex h-16 items-center justify-between px-4">
                 <!-- Logo -->
-                <div class="shrink-0 flex items-center">
-                    <a href="{{ route('dashboard') }}" wire:navigate>
-                        <x-application-logo class="block h-9 w-auto fill-current text-gray-800 dark:text-gray-200" />
-                    </a>
-                </div>
-
-                <!-- Navigation Links -->
-                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate>
-                        {{ __('Dashboard') }}
-                    </x-nav-link>
-                    <x-nav-link :href="route('tasks.index')" :active="request()->routeIs('tasks.*')" wire:navigate>
-        {{ __('Tugas') }}
-    </x-nav-link>
-    <x-nav-link :href="route('calendar.index')" :active="request()->routeIs('calendar.*')" wire:navigate>
-        {{ __('calendar') }}
-    </x-nav-link>
-                </div>
-
-            </div>
-
-            <!-- Settings Dropdown -->
-            <div class="hidden sm:flex sm:items-center sm:ms-6">
-                <x-dropdown align="right" width="48">
-                    <x-slot name="trigger">
-                        <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition ease-in-out duration-150">
-                            <div x-data="{{ json_encode(['name' => auth()->user()->name]) }}" x-text="name" x-on:profile-updated.window="name = $event.detail.name"></div>
-
-                            <div class="ms-1">
-                                <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                                </svg>
-                            </div>
-                        </button>
-                    </x-slot>
-
-                    <x-slot name="content">
-                        <x-dropdown-link :href="route('profile')" wire:navigate>
-                            {{ __('Profile') }}
-                        </x-dropdown-link>
-
-                        <!-- Authentication -->
-                        <form action="{{ route('logout') }}" method="POST" class="inline">
-    @csrf
-    <button type="submit" class="px-4 py-2 text-white bg-red-600 rounded hover:bg-red-700">
-        Logout
-    </button>
-</form>
-
-                    </x-slot>
-                </x-dropdown>
-            </div>
-
-            <!-- Hamburger -->
-            <div class="-me-2 flex items-center sm:hidden">
-                <button @click="open = ! open" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900 focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-900 focus:text-gray-500 dark:focus:text-gray-400 transition duration-150 ease-in-out">
-                    <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
-                        <path :class="{'hidden': open, 'inline-flex': ! open }" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                        <path :class="{'hidden': ! open, 'inline-flex': open }" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                <a href="{{ route('dashboard') }}" class="flex items-center gap-3">
+                    <svg class="h-8 w-8" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                    </svg>
+                    <span class="text-xl font-bold transition-all duration-300"
+                          :class="!sidebarOpen && 'hidden'">
+                        TIMVANZ
+                    </span>
+                </a>
+                <!-- Toggle Sidebar -->
+                <button @click="toggleSidebar" class="rounded-lg p-1.5 text-white/80 hover:bg-white/10">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                              :d="sidebarOpen ? 'M15 19l-7-7 7-7' : 'M9 19l7-7-7-7'"/>
                     </svg>
                 </button>
             </div>
-        </div>
+
+            <!-- Navigation -->
+            <nav class="flex-1 space-y-1 px-3 py-4">
+                <a href="{{ route('dashboard') }}"
+                   class="group flex items-center gap-3 rounded-lg px-3 py-2 text-white/90 hover:bg-white/10
+                          {{ request()->routeIs('dashboard') ? 'bg-white/10' : '' }}">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                              d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                    </svg>
+                    <span :class="!sidebarOpen && 'hidden'">Dashboard</span>
+                </a>
+
+                <a href="{{ route('tasks.index') }}"
+                   class="group flex items-center gap-3 rounded-lg px-3 py-2 text-white/90 hover:bg-white/10
+                          {{ request()->routeIs('tasks.*') ? 'bg-white/10' : '' }}">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                              d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                    </svg>
+                    <span :class="!sidebarOpen && 'hidden'">Tasks</span>
+                </a>
+
+                <a href="{{ route('calendar.index') }}"
+                   class="group flex items-center gap-3 rounded-lg px-3 py-2 text-white/90 hover:bg-white/10
+                          {{ request()->routeIs('calendar.*') ? 'bg-white/10' : '' }}">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                    <span :class="!sidebarOpen && 'hidden'">Calendar</span>
+                </a>
+            </nav>
+
+            <!-- User Profile & Settings -->
+            <div class="border-t border-white/10 px-3 py-4">
+                <div class="flex items-center gap-3 rounded-lg px-3 py-2 text-white/90">
+                    <img src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name) }}&background=random" 
+                         class="h-8 w-8 rounded-full" alt="Profile">
+                    <div :class="!sidebarOpen && 'hidden'">
+                        <div class="font-medium">
+                            {{ auth()->user()->name }}
+                        </div>
+                        <div class="text-sm text-white/60">
+                            {{ auth()->user()->email }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-3 space-y-1" :class="!sidebarOpen && 'hidden'">
+                    <!-- Dark Mode Toggle -->
+                    <button @click="toggleDarkMode" 
+                            class="w-full rounded-lg px-3 py-2 text-left text-white/90 hover:bg-white/10">
+                        <div class="flex items-center gap-3">
+                            <svg x-show="!darkMode" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                      d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+                            </svg>
+                            <svg x-show="darkMode" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                      d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+                            </svg>
+                            <span>Dark Mode</span>
+                        </div>
+                    </button>
+
+                    <!-- Profile Link -->
+                    <a href="{{ route('profile') }}"
+                       class="flex items-center gap-3 rounded-lg px-3 py-2 text-white/90 hover:bg-white/10">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                        </svg>
+                        <span>Profile</span>
+                    </a>
+
+                    <!-- Logout Button -->
+                    <!-- 
+                        Rekomendasi: buat komponen Livewire terpisah untuk logout, 
+                        atau gunakan form standard POST ke route('logout').
+                    -->
+                    <form action="{{ route('logout') }}" method="POST">
+                        @csrf
+                        <button type="submit" 
+                                class="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-white/90 hover:bg-white/10">
+                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                      d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                            </svg>
+                            <span>Logout</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="transition-all duration-300 flex-1" :class="sidebarOpen ? 'ml-64' : 'ml-20'">
+            <div class="w-full min-h-screen p-4">
+                @yield('content')
+            </div>
+        </main>
     </div>
 
-    <!-- Responsive Navigation Menu -->
-    <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
-        <div class="pt-2 pb-3 space-y-1">
-            <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate>
-                {{ __('Dashboard') }}
-            </x-responsive-nav-link>
-        </div>
-
-        <!-- Responsive Settings Options -->
-        <div class="pt-4 pb-1 border-t border-gray-200 dark:border-gray-600">
-            <div class="px-4">
-                <div class="font-medium text-base text-gray-800 dark:text-gray-200" x-data="{{ json_encode(['name' => auth()->user()->name]) }}" x-text="name" x-on:profile-updated.window="name = $event.detail.name"></div>
-                <div class="font-medium text-sm text-gray-500">{{ auth()->user()->email }}</div>
-            </div>
-
-            <div class="mt-3 space-y-1">
-                <x-responsive-nav-link :href="route('profile')" wire:navigate>
-                    {{ __('Profile') }}
-                </x-responsive-nav-link>
-
-                <!-- Authentication -->
-                <form action="{{ route('logout') }}" method="POST" class="inline">
-    @csrf
-    <button type="submit" class="px-4 py-2 text-white bg-red-600 rounded hover:bg-red-700">
-        Logout
-    </button>
-</form>
-
-            </div>
-        </div>
-    </div>
-</nav>
+    {{-- Letakkan script Livewire di akhir body (opsional) --}}
+    {{-- @livewireScripts --}}
+    @yield('scripts')
+</body>
+</html>

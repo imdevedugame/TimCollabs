@@ -2,6 +2,7 @@ import './bootstrap';
 import './calendar.js';
 import Echo from 'laravel-echo';
 import Pusher from 'pusher-js';
+import '@fortawesome/fontawesome-free/css/all.min.css';
 
 window.Pusher = Pusher;
 

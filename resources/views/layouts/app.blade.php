@@ -7,32 +7,23 @@
 
         <title>{{ config('app.name', 'Laravel') }}</title>
 
-        <!-- Fonts -->
+        <!-- Fonts & Scripts -->
         <script src="//unpkg.com/alpinejs" defer></script>
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
-
-        <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js','resources/js/calendar.js'])
     </head>
+
     <body class="font-sans antialiased">
-        <div class="min-h-screen bg-gray-100 dark:bg-gray-900">
+        <!-- Wrapper utama menggunakan display: flex -->
+        <div class="w-full min-h-screen bg-gray-100 dark:bg-gray-900 flex">
+            <!-- Sidebar: Livewire Component -->
             <livewire:layout.navigation />
 
-            <!-- Page Heading -->
-            @if (isset($header))
-                <header class="bg-white dark:bg-gray-800 shadow">
-                    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                        {{ $header }}
-                    </div>
-                </header>
-            @endif
+            <!-- Konten Utama -->
+           
 
-            <!-- Page Content -->
-            <main>
-            @yield('content')
-            @yield('scripts')
-            </main>
-        </div>
+        {{-- Tempatkan di luar <main> agar script bisa dipanggil setelah konten --}}
+        @yield('scripts')
     </body>
 </html>

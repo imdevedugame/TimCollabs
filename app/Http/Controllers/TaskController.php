@@ -4,15 +4,24 @@ namespace App\Http\Controllers;
 
 use App\Models\Task;
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\Auth;
 class TaskController extends Controller
 {
     public function index()
-    {
-        // Ambil tugas yang dibuat oleh user yang sedang login, urutkan deadline terdekat
-        $tasks = auth()->user()->tasks()->orderBy('deadline', 'asc')->get();
+{
+    $user = Auth::user();
+
+    // Ambil task yang user buat (owner)
+    $ownedTasks = $user->ownedTasks()->orderBy('deadline', 'asc')->get();
+
+    // Ambil task di mana user menjadi member
+    $memberTasks = $user->tasks()->orderBy('deadline', 'asc')->get();
+
+    // Gabungkan kedua collection dan urutkan berdasarkan deadline
+    $tasks = $ownedTasks->merge($memberTasks)->sortBy('deadline');
+
     return view('tasks.index', compact('tasks'));
-    }
+}
     
     public function create()
     {

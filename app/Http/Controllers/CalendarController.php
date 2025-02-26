@@ -4,16 +4,25 @@ namespace App\Http\Controllers;
 
 use App\Models\Task;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 
 class CalendarController extends Controller
 {
     public function index()
     {
-        // Ambil tasks yang punya deadline
-        $tasks = Task::whereNotNull('deadline')->get();
+        $user = Auth::user();
 
-        // Ubah tasks ke bentuk event FullCalendar
+        // Ambil tasks yang dimiliki user (one-to-many) dengan deadline
+        $ownedTasks = $user->ownedTasks()->whereNotNull('deadline')->get();
+
+        // Ambil tasks dimana user adalah member (many-to-many) dengan deadline
+        $memberTasks = $user->tasks()->whereNotNull('deadline')->get();
+
+        // Gabungkan kedua collection dan urutkan berdasarkan deadline
+        $tasks = $ownedTasks->merge($memberTasks)->sortBy('deadline');
+
+        // Ubah tasks ke bentuk event untuk FullCalendar
         $events = $tasks->map(function ($task) {
             // Tentukan warna berdasarkan prioritas
             $color = match ($task->priority) {
@@ -23,19 +32,10 @@ class CalendarController extends Controller
             };
 
             return [
-                // 'title' akan ditampilkan di kotak tanggal
                 'title' => $task->title,
-
-                // Tanggal mulai (deadline). Jika ingin juga jam:menit, pakai 'Y-m-d H:i:s'
                 'start' => $task->deadline->format('Y-m-d H:i:s'),
-
-                // Warna latar event
                 'color' => $color,
-
-                // Warna teks (supaya tidak tersamar)
                 'textColor' => '#fff',
-
-                // Data tambahan untuk tooltip
                 'extendedProps' => [
                     'priority' => $task->priority,
                     'deadline' => $task->deadline->format('d M Y H:i'),
@@ -43,7 +43,6 @@ class CalendarController extends Controller
             ];
         });
 
-        // Kirim $events ke view
         return view('calendar.index', compact('events'));
     }
 }

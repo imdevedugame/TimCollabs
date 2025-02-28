@@ -23,7 +23,7 @@
 </head>
 
 <body class="font-sans antialiased bg-white dark:bg-gray-900">
-    <div class="flex min-h-screen">
+    <div class="flex w-full min-h-screen">
         <!-- SIDEBAR -->
         <aside class="fixed inset-y-0 left-0 z-50 flex flex-col transition-all duration-300
                       bg-gradient-to-b from-blue-600 to-blue-800 dark:from-gray-800 dark:to-gray-900

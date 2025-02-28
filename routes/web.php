@@ -8,6 +8,7 @@ use App\Http\Controllers\CommentController;
 use App\Livewire\Actions\Logout;
 
 use App\Http\Controllers\LogoutController;
+use App\Http\Controllers\CalendarCardController;
 
 
     // Route untuk logout, menggunakan POST untuk keamanan
@@ -32,6 +33,12 @@ Route::middleware(['auth'])->group(function () {
          ->middleware(['verified'])
          ->name('dashboard');
 
+ Route::get('/dashboard', [CalendarCardController::class, 'index'])
+ ->name('dashboard')
+ ;// Misal, hanya menggunakan index dan show
+
+ Route::resource('calendar', CalendarController::class);
+ 
     // Task resource
     Route::resource('tasks', TaskController::class);
 

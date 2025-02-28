@@ -10,39 +10,35 @@ use Carbon\Carbon;
 class CalendarController extends Controller
 {
     public function index()
-    {
-        $user = Auth::user();
+{
+    $user = Auth::user();
+    $ownedTasks = $user->ownedTasks()->whereNotNull('deadline')->get();
+    $memberTasks = $user->tasks()->whereNotNull('deadline')->get();
+    $tasks = $ownedTasks->merge($memberTasks)->sortBy('deadline');
 
-        // Ambil tasks yang dimiliki user (one-to-many) dengan deadline
-        $ownedTasks = $user->ownedTasks()->whereNotNull('deadline')->get();
+    $events = $tasks->map(function ($task) {
+        $color = match ($task->priority) {
+            'high'   => '#dc3545',  // merah
+            'medium' => '#ffc107',  // kuning
+            default  => '#198754',  // hijau
+        };
 
-        // Ambil tasks dimana user adalah member (many-to-many) dengan deadline
-        $memberTasks = $user->tasks()->whereNotNull('deadline')->get();
+        return [
+            'title' => $task->title,
+            'start' => $task->deadline->format('Y-m-d H:i:s'),
+            'color' => $color,
+            'textColor' => '#fff',
+            'extendedProps' => [
+                'priority' => $task->priority,
+                'deadline' => $task->deadline->format('d M Y H:i'),
+            ],
+        ];
+    });
 
-        // Gabungkan kedua collection dan urutkan berdasarkan deadline
-        $tasks = $ownedTasks->merge($memberTasks)->sortBy('deadline');
+    // Debugging untuk memastikan `$events` tidak kosong
+    
 
-        // Ubah tasks ke bentuk event untuk FullCalendar
-        $events = $tasks->map(function ($task) {
-            // Tentukan warna berdasarkan prioritas
-            $color = match ($task->priority) {
-                'high'   => '#dc3545',  // merah
-                'medium' => '#ffc107',  // kuning
-                default  => '#198754',  // hijau
-            };
+    return view('calendar.index', compact('events'));
+}
 
-            return [
-                'title' => $task->title,
-                'start' => $task->deadline->format('Y-m-d H:i:s'),
-                'color' => $color,
-                'textColor' => '#fff',
-                'extendedProps' => [
-                    'priority' => $task->priority,
-                    'deadline' => $task->deadline->format('d M Y H:i'),
-                ],
-            ];
-        });
-
-        return view('calendar.index', compact('events'));
-    }
 }

@@ -9,7 +9,7 @@ use App\Livewire\Actions\Logout;
 
 use App\Http\Controllers\LogoutController;
 use App\Http\Controllers\CalendarCardController;
-
+use App\Http\Controllers\FriendController;
 
     // Route untuk logout, menggunakan POST untuk keamanan
 
@@ -46,7 +46,10 @@ Route::middleware(['auth'])->group(function () {
    Route::post('/tasks/{task}/invite', [TaskController::class, 'inviteMember'])
     ->name('tasks.invite')
     ->middleware('auth');
-
+    Route::get('friends', [FriendController::class, 'index'])->name('friends.index');
+    Route::post('friends/{invitation}/accept', [FriendController::class, 'accept'])->name('friends.accept');
+    Route::delete('friends/{invitation}/reject', [FriendController::class, 'reject'])->name('friends.reject');
+    
 
     // Subtasks (nested di dalam task)
     Route::post('/tasks/{task}/subtasks', [SubtaskController::class, 'store'])

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Task;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\FriendInvitation; 
 class TaskController extends Controller
 {
     public function index()
@@ -90,20 +91,47 @@ class TaskController extends Controller
 {
     $request->validate([
         'email' => 'required|email|exists:users,email',
-        'role'  => 'nullable|string', // opsional
+        'role'  => 'nullable|string',
     ]);
 
     // Cari user berdasarkan email
     $user = \App\Models\User::where('email', $request->email)->first();
 
-    // Attach user ke task
-    $task->users()->attach($user->id, [
-        'role' => $request->role ?? 'member',
+    if (! $user) {
+        return redirect()->route('tasks.show', $task->id)
+                         ->with('error', 'User tidak ditemukan.');
+    }
+
+    // Cek apakah sudah ada undangan untuk task ini
+    $existingInvitation = \App\Models\FriendInvitation::where('task_id', $task->id)
+                            ->where('receiver_id', $user->id)
+                            ->first();
+
+    if ($existingInvitation) {
+        if ($existingInvitation->status === 'pending') {
+            return redirect()->route('tasks.show', $task->id)
+                             ->with('error', 'Undangan sudah dikirim dan masih pending.');
+        } elseif ($existingInvitation->status === 'accepted') {
+            return redirect()->route('tasks.show', $task->id)
+                             ->with('error', 'User sudah menjadi anggota.');
+        } else { // rejected atau status lain
+            return redirect()->route('tasks.show', $task->id)
+                             ->with('error', 'Undangan sebelumnya telah ditolak.');
+        }
+    }
+
+    // Jika validasi lolos, buat undangan baru
+    \App\Models\FriendInvitation::create([
+        'sender_id'   => auth()->id(),
+        'receiver_id' => $user->id,
+        'task_id'     => $task->id,
+        'status'      => 'pending',
     ]);
 
     return redirect()->route('tasks.show', $task->id)
                      ->with('success', 'Berhasil mengundang anggota.');
 }
+
 
     
 }

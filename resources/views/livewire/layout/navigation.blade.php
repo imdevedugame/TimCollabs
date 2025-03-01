@@ -16,7 +16,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>@yield('title', 'Dashboard - TIMVANZ')</title>
-    <!-- Sertakan styles dan script sesuai kebutuhan, misalnya: -->
+    <!-- Sertakan styles dan script sesuai kebutuhan -->
     {{-- @vite(['resources/css/app.css', 'resources/js/app.js']) --}}
     {{-- @livewireStyles --}}
     <script src="//unpkg.com/alpinejs" defer></script>
@@ -81,6 +81,18 @@
                     </svg>
                     <span :class="!sidebarOpen && 'hidden'">Calendar</span>
                 </a>
+
+                <!-- Menu Baru: Frends -->
+                <a href="{{ route('friends.index') }}"
+                   class="group flex items-center gap-3 rounded-lg px-3 py-2 text-white/90 hover:bg-white/10
+                          {{ request()->routeIs('friends.*') ? 'bg-white/10' : '' }}">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <!-- Icon Users / Group -->
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M17 20h5v-2a4 4 0 00-4-4H9a4 4 0 00-4 4v2h5m6-10a4 4 0 11-8 0 4 4 0 018 0z"/>
+                    </svg>
+                    <span :class="!sidebarOpen && 'hidden'">Frends</span>
+                </a>
             </nav>
 
             <!-- User Profile & Settings -->
@@ -126,10 +138,6 @@
                     </a>
 
                     <!-- Logout Button -->
-                    <!-- 
-                        Rekomendasi: buat komponen Livewire terpisah untuk logout, 
-                        atau gunakan form standard POST ke route('logout').
-                    -->
                     <form action="{{ route('logout') }}" method="POST">
                         @csrf
                         <button type="submit" 
@@ -153,7 +161,6 @@
         </main>
     </div>
 
-    {{-- Letakkan script Livewire di akhir body (opsional) --}}
     {{-- @livewireScripts --}}
     @yield('scripts')
 </body>

@@ -56,7 +56,7 @@ Route::middleware(['auth'])->group(function () {
          ->name('subtasks.store');
     Route::patch('/subtasks/{subtask}', [SubtaskController::class, 'update'])
          ->name('subtasks.update');
-
+     
     // Calendar
     Route::get('/calendar', [CalendarController::class, 'index'])
          ->name('calendar.index');

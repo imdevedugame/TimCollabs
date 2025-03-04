@@ -6,7 +6,7 @@ use App\Http\Controllers\SubtaskController;
 use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\CommentController;
 use App\Livewire\Actions\Logout;
-
+use Livewire\Volt\Volt;
 use App\Http\Controllers\LogoutController;
 use App\Http\Controllers\CalendarCardController;
 use App\Http\Controllers\FriendController;
@@ -24,6 +24,7 @@ use App\Http\Controllers\FriendController;
 
 // Public route
 Route::view('/', 'welcome');
+
 
 // Routes yang memerlukan autentikasi
 Route::middleware(['auth'])->group(function () {

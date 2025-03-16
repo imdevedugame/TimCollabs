@@ -20,6 +20,28 @@
     </div>
     @endif
 
+    @php
+        // Asumsikan $tasks adalah collection dari semua tugas
+        $totalTasks = $tasks->count();
+        $completedTasks = $tasks->where('status', 'completed')->count();
+        $inProgressTasks = $tasks->where('status', 'in_progress')->count();
+        $urgentTasks = $tasks->where('priority', 'high')->count();
+        
+        $completionPercentage = $totalTasks > 0 ? ($completedTasks / $totalTasks * 100) : 0;
+        $inProgressPercentage = $totalTasks > 0 ? ($inProgressTasks / $totalTasks * 100) : 0;
+        $urgentPercentage = $totalTasks > 0 ? ($urgentTasks / $totalTasks * 100) : 0;
+        
+        // Filter tugas yang masih aktif (deadline belum lewat atau tidak ada deadline)
+        $activeTasks = $tasks->filter(function($task) {
+            // Jika tidak ada deadline, dianggap aktif
+            if (!$task->deadline) {
+                return true;
+            }
+            // Jika deadline masih di masa depan, maka aktif
+            return $task->deadline->isFuture();
+        });
+    @endphp
+
     <!-- Task Statistics Cards -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <!-- Total Tasks Card -->
@@ -33,13 +55,16 @@
                 <div class="flex-grow">
                     <h2 class="text-lg font-semibold text-gray-700">Total Tugas</h2>
                     <div class="flex justify-between items-center">
-                        <span class="text-gray-500">Progress</span>
-                        <span class="text-2xl font-bold">{{ $tasks->count() }}</span>
+                        <span class="text-gray-500">Prosess</span>
+                        <span class="text-2xl font-bold">{{ $totalTasks }}</span>
                     </div>
                 </div>
             </div>
             <div class="w-full bg-gray-200 rounded-full h-2.5">
-                <div class="bg-blue-600 h-2.5 rounded-full" style="width: {{ $tasks->count() > 0 ? ($tasks->where('status', 'completed')->count() / $tasks->count() * 100) : 0 }}%"></div>
+                <div class="bg-blue-600 h-2.5 rounded-full" style="width: {{ $completionPercentage }}%"></div>
+            </div>
+            <div class="mt-2 text-sm text-gray-500 text-right">
+                {{ $completedTasks }} dari {{ $totalTasks }} selesai ({{ round($completionPercentage) }}%)
             </div>
         </div>
 
@@ -54,13 +79,16 @@
                 <div class="flex-grow">
                     <h2 class="text-lg font-semibold text-gray-700">Dalam Proses</h2>
                     <div class="flex justify-between items-center">
-                        <span class="text-gray-500">Active Tasks</span>
-                        <span class="text-2xl font-bold">{{ $tasks->where('status', 'in_progress')->count() }}</span>
+                        <span class="text-gray-500">Tugas Berlangsung</span>
+                        <span class="text-2xl font-bold">{{ $inProgressTasks }}</span>
                     </div>
                 </div>
             </div>
             <div class="w-full bg-gray-200 rounded-full h-2.5">
-                <div class="bg-yellow-400 h-2.5 rounded-full" style="width: 50%"></div>
+                <div class="bg-yellow-400 h-2.5 rounded-full" style="width: {{ $inProgressPercentage }}%"></div>
+            </div>
+            <div class="mt-2 text-sm text-gray-500 text-right">
+                {{ $inProgressTasks }} dari {{ $totalTasks }} dalam proses ({{ round($inProgressPercentage) }}%)
             </div>
         </div>
 
@@ -76,12 +104,15 @@
                     <h2 class="text-lg font-semibold text-gray-700">Tugas Mendesak</h2>
                     <div class="flex justify-between items-center">
                         <span class="text-gray-500">High Priority</span>
-                        <span class="text-2xl font-bold">{{ $tasks->where('priority', 'high')->count() }}</span>
+                        <span class="text-2xl font-bold">{{ $urgentTasks }}</span>
                     </div>
                 </div>
             </div>
             <div class="w-full bg-gray-200 rounded-full h-2.5">
-                <div class="bg-red-500 h-2.5 rounded-full" style="width: {{ $tasks->count() > 0 ? ($tasks->where('priority', 'high')->count() / $tasks->count() * 100) : 0 }}%"></div>
+                <div class="bg-red-500 h-2.5 rounded-full" style="width: {{ $urgentPercentage }}%"></div>
+            </div>
+            <div class="mt-2 text-sm text-gray-500 text-right">
+                {{ $urgentTasks }} dari {{ $totalTasks }} mendesak ({{ round($urgentPercentage) }}%)
             </div>
         </div>
     </div>
@@ -104,7 +135,17 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
-                        @forelse ($tasks as $task)
+                        @php
+                            // Ambil tugas aktif (yang belum lewat deadline)
+                            $displayTasks = $activeTasks;
+                        @endphp
+                        @forelse ($displayTasks as $task)
+                        @php
+                            // Ambil role user dari pivot pada task ini
+                            $currentUser = auth()->user();
+                            $userTask = $task->users->firstWhere('id', $currentUser->id);
+                            $role = $userTask ? $userTask->pivot->role : null;
+                        @endphp
                         <tr class="hover:bg-gray-50">
                             <td class="px-6 py-4">
                                 <div class="font-medium text-gray-900">{{ $task->title }}</div>
@@ -135,6 +176,7 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                         </svg>
                                     </a>
+                                    @if($role !== 'member')
                                     <a href="{{ route('tasks.edit', $task->id) }}" class="text-yellow-600 hover:text-yellow-900" title="Edit">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -149,6 +191,7 @@
                                             </svg>
                                         </button>
                                     </form>
+                                    @endif
                                 </div>
                             </td>
                         </tr>
@@ -213,12 +256,23 @@
     </div>
 
     <!-- Task Progress Cards -->
+    @php
+        // Filter tugas untuk progress card: hanya ambil tugas aktif (deadline belum lewat atau tidak ada deadline)
+        $recentTasks = $tasks->filter(function($task) {
+            if (!$task->deadline) {
+                return true;
+            }
+            return $task->deadline->isFuture();
+        })->sortByDesc('created_at')->take(2);
+    @endphp
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        @php
-            $recentTasks = $tasks->sortByDesc('created_at')->take(2);
-        @endphp
-        
         @foreach($recentTasks as $task)
+        @php
+            // Hitung progress berdasarkan subtasks
+            $totalSubtasks = $task->subtasks->count();
+            $completedSubtasks = $task->subtasks->where('is_done', true)->count();
+            $taskProgress = $totalSubtasks > 0 ? round(($completedSubtasks / $totalSubtasks) * 100) : 0;
+        @endphp
         <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-100">
             <div class="flex items-start mb-4">
                 @if($task->priority == 'high')
@@ -239,20 +293,20 @@
             
             <div class="mb-4">
                 <div class="flex justify-between text-sm mb-1">
-                    <span>Progress</span>
-                    <span>{{ $task->progress ?? '0' }}%</span>
+                    <span>Prosess</span>
+                    <span>{{ $taskProgress }}%</span>
                 </div>
                 <div class="w-full bg-gray-200 rounded-full h-2">
-                    <div class="bg-blue-600 h-2 rounded-full" style="width: {{ $task->progress ?? '0' }}%"></div>
+                    <div class="bg-blue-600 h-2 rounded-full" style="width: {{ $taskProgress }}%"></div>
                 </div>
             </div>
             
             <div class="flex justify-between items-center">
                 <div class="text-sm text-gray-500">
-                    <span>{{ $task->subtasks_count ?? 0 }}/{{ $task->total_subtasks ?? 0 }} subtasks</span>
+                    <span>{{ $completedSubtasks }}/{{ $totalSubtasks }} subtasks</span>
                 </div>
                 <a href="{{ route('tasks.show', $task->id) }}" class="text-sm font-medium text-blue-600 hover:text-blue-800">
-                    View Details →
+                    Lihat Tugas →
                 </a>
             </div>
         </div>

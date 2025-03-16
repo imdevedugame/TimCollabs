@@ -32,21 +32,21 @@ class TaskController extends Controller
 
     public function store(Request $request)
     {
-        // Validasi form
-        $request->validate([
-            'title' => 'required|max:255',
-            'description' => 'nullable',
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
             'priority' => 'required|in:low,medium,high',
             'deadline' => 'nullable|date',
         ]);
-
-        // Simpan ke DB
-        Task::create($request->all());
-
-        // Kembali ke daftar tugas
-        return redirect()->route('tasks.index')
-                         ->with('success', 'Tugas berhasil dibuat.');
+    
+        // Sertakan user_id dari user yang sedang login
+        $validated['user_id'] = auth()->id();
+    
+        Task::create($validated);
+    
+        return redirect()->route('tasks.index')->with('success', 'Tugas berhasil dibuat.');
     }
+    
 
     public function show(Task $task)
     {
@@ -130,6 +130,19 @@ class TaskController extends Controller
 
     return redirect()->route('tasks.show', $task->id)
                      ->with('success', 'Berhasil mengundang anggota.');
+}
+public function archivedTasks(Request $request)
+{
+    $archivedTasks = Task::where('deadline', '<', now())
+    ->where(function ($query) {
+        $query->whereHas('users', function ($q) {
+            $q->where('user_id', auth()->id());
+        })
+        ->orWhere('user_id', auth()->id());
+    })
+    ->paginate(10);
+
+    return view('arsip.index', compact('archivedTasks'));
 }
 
 

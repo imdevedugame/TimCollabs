@@ -213,7 +213,7 @@ document.addEventListener("DOMContentLoaded", () => {
       </div>
     </div>
     
-    <div id="taskCalendar" style="
+    <div id="calendarContent" style="
       flex-grow: 1;
       padding: 1rem 2rem 2rem;
       overflow: auto;
@@ -320,8 +320,8 @@ document.addEventListener("DOMContentLoaded", () => {
   // Filter aktif default: all
   let activeFilter = "all"
 
-  // Inisialisasi FullCalendar pada elemen dengan ID "taskCalendar"
-  const calendarEl = document.getElementById("taskCalendar")
+  // Inisialisasi FullCalendar pada elemen dengan ID "calendarContent"
+  const calendarEl = document.getElementById("calendarContent")
   const calendar = new Calendar(calendarEl, {
     plugins: [dayGridPlugin],
     initialView: "dayGridMonth",
@@ -469,14 +469,10 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     },
     datesSet: (dateInfo) => {
-      // Update tampilan tanggal saat ini
+      // Gunakan dateInfo.view.title agar header kalender sesuai
       const dateDisplay = document.getElementById("current-date-display")
       if (dateDisplay) {
-        const formattedDate = dateInfo.start.toLocaleDateString("id-ID", {
-          month: "long",
-          year: "numeric",
-        })
-        dateDisplay.textContent = formattedDate
+        dateDisplay.textContent = dateInfo.view.title;
       }
     },
   })
@@ -629,4 +625,3 @@ function getStatusLabel(status) {
       return status
   }
 }
-

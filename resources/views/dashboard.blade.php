@@ -4,34 +4,40 @@
 <!-- Header Full-Width -->
 <header class="w-full bg-blue-600 text-white py-6">
   <div class="container mx-auto px-4">
-    <h1 class="text-3xl font-bold">Welcome back, {{ auth()->user()->name }}!</h1>
-    <p class="mt-2 text-lg">Here's your dashboard overview for today</p>
+    <h1 class="text-3xl font-bold">selamat Datang, {{ auth()->user()->name }}!</h1>
+    <p class="mt-2 text-lg">Berikut Semua Tugas yang kamu buat</p>
   </div>
 </header>
 
 <main class="container mx-auto px-4 py-8">
+  @php
+    // Gabungkan semua tugas: milik user (ownedTasks) dan yang diikuti (tasks)
+    $allTasks = auth()->user()->ownedTasks->merge(auth()->user()->tasks);
+
+    // Filter tugas yang masih aktif: jika tidak ada deadline, atau deadline di masa depan
+    $activeAllTasks = $allTasks->filter(function($task) {
+      if (!$task->deadline) {
+          return true;
+      }
+      return \Carbon\Carbon::parse($task->deadline)->isFuture();
+    });
+
+    // Hitung statistik berdasarkan tugas aktif
+    $totalTasks = $activeAllTasks->count();
+    $completedTasks = $activeAllTasks->filter(function($task) {
+      return $task->subtasks->where('is_done', true)->count() === $task->subtasks->count()
+          && $task->subtasks->count() > 0;
+    })->count();
+    $inProgressTasks = $totalTasks - $completedTasks;
+    $urgentTasks = $activeAllTasks->where('priority', 'high')->count();
+
+    $completionPercentage = $totalTasks > 0 ? ($completedTasks / $totalTasks * 100) : 0;
+    $inProgressPercentage = $totalTasks > 0 ? ($inProgressTasks / $totalTasks * 100) : 0;
+    $urgentPercentage = $totalTasks > 0 ? ($urgentTasks / $totalTasks * 100) : 0;
+  @endphp
+
   <!-- Baris pertama: Statistik Umum Tugas -->
   <div class="grid gap-6 mb-8 md:grid-cols-3">
-    @php
-      // Menggabungkan semua tugas (milik user dan yang diikuti)
-      $allTasks = auth()->user()->ownedTasks->merge(auth()->user()->tasks);
-
-      // Total tugas
-      $totalTasks = $allTasks->count();
-
-      // Jumlah tugas selesai (misal, berdasarkan subtasks)
-      $completedTasks = $allTasks->filter(function($task) {
-          return $task->subtasks->where('is_done', true)->count() === $task->subtasks->count()
-              && $task->subtasks->count() > 0;
-      })->count();
-
-      // Tugas yang sedang aktif
-      $inProgressTasks = $totalTasks - $completedTasks;
-
-      // Tugas dengan prioritas tinggi
-      $urgentTasks = $allTasks->where('priority', 'high')->count();
-    @endphp
-
     <!-- Total Tasks Card -->
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
       <div class="flex items-center justify-between mb-4">
@@ -43,20 +49,20 @@
                     d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
             </svg>
           </div>
-          <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Total Tasks</h3>
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Total Tugas</h3>
         </div>
         <span class="text-2xl font-bold text-gray-900 dark:text-white">{{ $totalTasks }}</span>
       </div>
       <div class="space-y-2">
         <div class="flex justify-between text-sm">
-          <span class="text-gray-500 dark:text-gray-400">Progress</span>
+          <span class="text-gray-500 dark:text-gray-400">Prosess</span>
           <span class="text-gray-700 dark:text-gray-300">
-            {{ $totalTasks > 0 ? round(($completedTasks / $totalTasks) * 100) : 0 }}%
+            {{ $totalTasks > 0 ? round($completionPercentage) : 0 }}%
           </span>
         </div>
         <div class="h-2 bg-gray-200 rounded-full dark:bg-gray-700">
           <div class="h-2 bg-blue-600 rounded-full" 
-               style="width: {{ $totalTasks > 0 ? ($completedTasks / $totalTasks) * 100 : 0 }}%"></div>
+               style="width: {{ $totalTasks > 0 ? $completionPercentage : 0 }}%"></div>
         </div>
       </div>
     </div>
@@ -71,20 +77,20 @@
                     d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
           </div>
-          <h3 class="text-lg font-semibold text-gray-900 dark:text-white">In Progress</h3>
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Prosess</h3>
         </div>
         <span class="text-2xl font-bold text-gray-900 dark:text-white">{{ $inProgressTasks }}</span>
       </div>
       <div class="space-y-2">
         <div class="flex justify-between text-sm">
-          <span class="text-gray-500 dark:text-gray-400">Active Tasks</span>
+          <span class="text-gray-500 dark:text-gray-400">Tugas Berlangsung</span>
           <span class="text-gray-700 dark:text-gray-300">
-            {{ $totalTasks > 0 ? round(($inProgressTasks / $totalTasks) * 100) : 0 }}%
+            {{ $totalTasks > 0 ? round($inProgressPercentage) : 0 }}%
           </span>
         </div>
         <div class="h-2 bg-gray-200 rounded-full dark:bg-gray-700">
           <div class="h-2 bg-yellow-500 rounded-full" 
-               style="width: {{ $totalTasks > 0 ? ($inProgressTasks / $totalTasks) * 100 : 0 }}%"></div>
+               style="width: {{ $totalTasks > 0 ? $inProgressPercentage : 0 }}%"></div>
         </div>
       </div>
     </div>
@@ -99,7 +105,7 @@
                     d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
           </div>
-          <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Urgent Tasks</h3>
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Tugas Mendesak</h3>
         </div>
         <span class="text-2xl font-bold text-gray-900 dark:text-white">{{ $urgentTasks }}</span>
       </div>
@@ -107,12 +113,12 @@
         <div class="flex justify-between text-sm">
           <span class="text-gray-500 dark:text-gray-400">High Priority</span>
           <span class="text-gray-700 dark:text-gray-300">
-            {{ $totalTasks > 0 ? round(($urgentTasks / $totalTasks) * 100) : 0 }}%
+            {{ $totalTasks > 0 ? round($urgentPercentage) : 0 }}%
           </span>
         </div>
         <div class="h-2 bg-gray-200 rounded-full dark:bg-gray-700">
           <div class="h-2 bg-red-500 rounded-full" 
-               style="width: {{ $totalTasks > 0 ? ($urgentTasks / $totalTasks) * 100 : 0 }}%"></div>
+               style="width: {{ $totalTasks > 0 ? $urgentPercentage : 0 }}%"></div>
         </div>
       </div>
     </div>
@@ -120,76 +126,78 @@
 
   <!-- Baris kedua: Kalender dan Info Tasks Bulan Ini -->
   <div class="grid gap-6 mb-8 md:grid-cols-2">
-  <!-- Card Kalender (tinggi diperkecil menjadi 250px) -->
-  <div class="card shadow rounded p-4 bg-white">
-    <h2 class="text-lg font-bold mb-2">Task Calendar</h2>
-    <div id="taskCalendarCard" style="height: 250px; position: relative;"></div>
-  </div>
+    <!-- Card Kalender (tinggi diperkecil menjadi 250px) -->
+    <div class="card shadow rounded p-4 bg-white">
+      <h2 class="text-lg font-bold mb-2">Kalender Tugas</h2>
+      <div id="taskCalendarCard" style="height: 250px; position: relative;"></div>
+    </div>
 
-  <!-- Kolom Info: Grid dengan 2 baris card -->
-  <div class="grid gap-6">
-    <!-- Card Info Tasks Bulan Ini -->
-    @php
-      $currentMonth = \Carbon\Carbon::now()->month;
-      $currentYear = \Carbon\Carbon::now()->year;
-      $tasksThisMonth = $allTasks->filter(function($task) use ($currentMonth, $currentYear) {
-          return \Carbon\Carbon::parse($task->deadline)->month == $currentMonth 
+    <!-- Kolom Info: Grid dengan 2 baris card -->
+    <div class="grid gap-6">
+      <!-- Card Info Tasks Bulan Ini -->
+      @php
+        $currentMonth = \Carbon\Carbon::now()->month;
+        $currentYear = \Carbon\Carbon::now()->year;
+        $tasksThisMonth = $activeAllTasks->filter(function($task) use ($currentMonth, $currentYear) {
+            return $task->deadline 
+              && \Carbon\Carbon::parse($task->deadline)->month == $currentMonth 
               && \Carbon\Carbon::parse($task->deadline)->year == $currentYear;
-      });
-      $totalThisMonth = $tasksThisMonth->count();
-      $urgentThisMonth = $tasksThisMonth->where('priority', 'high')->count();
-    @endphp
-    <div class="card shadow rounded p-4 bg-white">
-      <div class="flex justify-between items-center mb-2">
-        <h2 class="text-lg font-bold">Tasks This Month</h2>
-        <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2v-5H3v5a2 2 0 002 2z"/>
-        </svg>
+        });
+        $totalThisMonth = $tasksThisMonth->count();
+        $urgentThisMonth = $tasksThisMonth->where('priority', 'high')->count();
+      @endphp
+      <div class="card shadow rounded p-4 bg-white">
+        <div class="flex justify-between items-center mb-2">
+          <h2 class="text-lg font-bold">Tugas Bulan Ini</h2>
+          <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2v-5H3v5a2 2 0 002 2z"/>
+          </svg>
+        </div>
+        <p class="text-sm text-gray-600 mb-2">Total Tugas Deadline Bulan Ini: <span class="font-bold">{{ $totalThisMonth }}</span></p>
+        <div class="flex justify-between items-center text-sm text-gray-600">
+          <span>Urgent Tasks:</span>
+          <span class="font-bold text-red-500">{{ $urgentThisMonth }}</span>
+        </div>
+        @if($totalThisMonth > 0)
+        <div class="mt-2 h-2 bg-gray-200 rounded-full">
+          <div class="h-2 bg-red-500 rounded-full" 
+               style="width: {{ ($urgentThisMonth / $totalThisMonth) * 100 }}%"></div>
+        </div>
+        @endif
       </div>
-      <p class="text-sm text-gray-600 mb-2">Total tasks due this month: <span class="font-bold">{{ $totalThisMonth }}</span></p>
-      <div class="flex justify-between items-center text-sm text-gray-600">
-        <span>Urgent Tasks:</span>
-        <span class="font-bold text-red-500">{{ $urgentThisMonth }}</span>
-      </div>
-      @if($totalThisMonth > 0)
-      <div class="mt-2 h-2 bg-gray-200 rounded-full">
-        <div class="h-2 bg-red-500 rounded-full" 
-             style="width: {{ ($urgentThisMonth / $totalThisMonth) * 100 }}%"></div>
-      </div>
-      @endif
-    </div>
 
-    <!-- Card Info Additional: Upcoming Deadlines -->
-    @php
-      // Ambil 3 tugas terdekat dari semua tugas
-      $upcomingTasks = $allTasks->sortBy('deadline')->take(3);
-    @endphp
-    <div class="card shadow rounded p-4 bg-white">
-      <div class="flex justify-between items-center mb-2">
-        <h2 class="text-lg font-bold">Upcoming Deadlines</h2>
-        <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-        </svg>
+      <!-- Card Info Additional: Upcoming Deadlines -->
+      @php
+        // Ambil 3 tugas terdekat dari tugas aktif
+        $upcomingTasks = $activeAllTasks->sortBy('deadline')->take(3);
+      @endphp
+      <div class="card shadow rounded p-4 bg-white">
+        <div class="flex justify-between items-center mb-2">
+          <h2 class="text-lg font-bold">Deadline Terdekat</h2>
+          <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+        </div>
+        @if($upcomingTasks->count() > 0)
+        <ul class="text-sm text-gray-600">
+          @foreach($upcomingTasks as $task)
+            <li class="mb-1">
+              <span class="font-semibold">{{ $task->title }}</span> - Deadlines: {{ \Carbon\Carbon::parse($task->deadline)->format('M d, Y') }}
+            </li>
+          @endforeach
+        </ul>
+        @else
+        <p class="text-sm text-gray-500">Belum ada tugas terdekat.</p>
+        @endif
       </div>
-      @if($upcomingTasks->count() > 0)
-      <ul class="text-sm text-gray-600">
-        @foreach($upcomingTasks as $task)
-          <li class="mb-1">
-            <span class="font-semibold">{{ $task->title }}</span> - Due: {{ \Carbon\Carbon::parse($task->deadline)->format('M d, Y') }}
-          </li>
-        @endforeach
-      </ul>
-      @else
-      <p class="text-sm text-gray-500">No upcoming deadlines.</p>
-      @endif
     </div>
   </div>
-</div>
- <!-- Baris ketiga: Grid Detail Tugas -->
+
+  <!-- Baris ketiga: Grid Detail Tugas -->
   <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-    @foreach($allTasks as $task)
+    @foreach($activeAllTasks as $task)
       @php
           $completedSubtasks = $task->subtasks->where('is_done', true)->count();
           $totalSubtasks = $task->subtasks->count();
@@ -238,7 +246,7 @@
               </p>
               <div class="space-y-2">
                   <div class="flex justify-between text-sm">
-                      <span class="text-gray-500 dark:text-gray-400">Progress</span>
+                      <span class="text-gray-500 dark:text-gray-400">Prosess</span>
                       <span class="text-gray-700 dark:text-gray-300">{{ round($progress) }}%</span>
                   </div>
                   <div class="h-2 bg-gray-200 rounded-full dark:bg-gray-700">
@@ -256,7 +264,7 @@
                   </div>
                   <a href="{{ route('tasks.show', $task->id) }}" 
                      class="text-sm font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300">
-                      View Details →
+                     Lihat Tugas →
                   </a>
               </div>
           </div>
@@ -268,7 +276,9 @@
 
 @section('scripts')
 <script>
-    window.calendarEvents = @json($events ?? []);
+  console.log("Calendar events:", window.calendarEvents);
+
+   window.calendarEvents = @json($events);
 </script>
 @vite(['resources/js/app.js','resources/js/calendarCard.js'])
 @endsection

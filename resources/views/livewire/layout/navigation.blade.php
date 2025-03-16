@@ -81,6 +81,16 @@
                     </svg>
                     <span :class="!sidebarOpen && 'hidden'">Calendar</span>
                 </a>
+                <a href="{{ route('archive.index') }}"
+                   class="group flex items-center gap-3 rounded-lg px-3 py-2 text-white/90 hover:bg-white/10
+                          {{ request()->routeIs('archive.*') ? 'bg-white/10' : '' }}">
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+        d="M20 13V7a2 2 0 00-2-2H6a2 2 0 00-2 2v6m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0H4M9 9h6" />
+</svg>
+
+                    <span :class="!sidebarOpen && 'hidden'">archive</span>
+                </a>
 
                 <!-- Menu Baru: Frends -->
                 <a href="{{ route('friends.index') }}"

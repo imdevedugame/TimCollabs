@@ -1,6 +1,16 @@
 @extends('layouts.app')
 
 @section('content')
+@php
+    $currentUser = auth()->user();
+    // Jika task dibuat oleh user, maka role dianggap 'owner'
+    // Jika tidak, ambil role dari pivot, jika ada
+    $role = $task->user_id == $currentUser->id
+                ? 'owner'
+                : ($task->users->firstWhere('id', $currentUser->id)->pivot->role ?? null);
+@endphp
+
+
 <div class="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <!-- Page Header -->
     <div class="flex justify-between items-center mb-8">
@@ -223,31 +233,33 @@
                     <h2 class="text-lg font-medium text-gray-900">Tim</h2>
                 </div>
                 <div class="p-6">
-                    <form action="{{ route('tasks.invite', $task->id) }}" method="POST" class="space-y-4">
-                        @csrf
-                        <div>
-                            <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
-                            <input type="email" name="email" id="email" required
-                                   class="mt-1 shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
-                                   placeholder="nama@email.com">
-                        </div>
-                        <div>
-                            <label for="role" class="block text-sm font-medium text-gray-700">Role</label>
-                            <select name="role" id="role"
-                                    class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
-                                <option value="member">Member</option>
-                                <option value="owner">Owner</option>
-                                <option value="observer">Observer</option>
-                            </select>
-                        </div>
-                        <button type="submit"
-                                class="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-                            </svg>
-                            Undang Anggota
-                        </button>
-                    </form>
+                    @if($role === 'owner')
+                        <form action="{{ route('tasks.invite', $task->id) }}" method="POST" class="space-y-4">
+                            @csrf
+                            <div>
+                                <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+                                <input type="email" name="email" id="email" required
+                                       class="mt-1 shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                                       placeholder="nama@email.com">
+                            </div>
+                            <div>
+                                <label for="role" class="block text-sm font-medium text-gray-700">Role</label>
+                                <select name="role" id="role"
+                                        class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
+                                    <option value="member">Member</option>
+                                    <option value="owner">Owner</option>
+                                    <option value="observer">Observer</option>
+                                </select>
+                            </div>
+                            <button type="submit"
+                                    class="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                                </svg>
+                                Undang Anggota
+                            </button>
+                        </form>
+                    @endif
 
                     <div class="mt-6">
                         <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Anggota Tim</h3>
@@ -282,6 +294,7 @@
             </div>
 
             <!-- Task Actions -->
+            @if($role !== 'member')
             <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
                 <div class="border-b border-gray-200 bg-gray-50 px-6 py-4">
                     <h2 class="text-lg font-medium text-gray-900">Aksi</h2>
@@ -307,6 +320,7 @@
                     </form>
                 </div>
             </div>
+            @endif
         </div>
     </div>
 </div>

@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="card shadow rounded p-4 bg-white">
-    <h2 class="text-lg font-bold mb-2">Task Calendar</h2>
+    <h2 class="text-lg font-bold mb-2">Kalender Tugas</h2>
     <div id="taskCalendarCard" style="height: 300px;"></div>
 </div>
 @endsection

@@ -88,33 +88,30 @@
                 </div>
             </div>
             
-            <!-- Friend Suggestions -->
+            <!-- Friend Statistics (Replacement for Friend Suggestions) -->
             <div class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden mt-6">
                 <div class="p-6 border-b border-gray-100">
-                    <h2 class="text-xl font-bold text-gray-800">Rekomendasi Teman</h2>
-                    <p class="text-sm text-gray-500">Orang yang mungkin Anda kenal</p>
+                    <h2 class="text-xl font-bold text-gray-800">Statistik Pertemanan</h2>
+                    <p class="text-sm text-gray-500">Ringkasan aktivitas pertemanan Anda</p>
                 </div>
                 
                 <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-                    @for ($i = 0; $i < 4; $i++)
-                    <div class="flex items-center justify-between p-4 border border-gray-100 rounded-lg hover:bg-gray-50">
-                        <div class="flex items-center">
-                            <div class="h-12 w-12 rounded-full bg-indigo-100 flex items-center justify-center mr-4">
-                                <span class="font-medium text-indigo-800">U</span>
-                            </div>
-                            <div>
-                                <h3 class="font-medium text-gray-900">User {{ $i + 1 }}</h3>
-                                <p class="text-sm text-gray-500">user{{ $i + 1 }}@example.com</p>
-                            </div>
-                        </div>
-                        <button class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-                            </svg>
-                            Tambah
-                        </button>
+                    <div class="border border-gray-100 rounded-lg p-4 text-center">
+                        <div class="text-3xl font-bold text-blue-600">{{ $friends->count() }}</div>
+                        <div class="text-sm text-gray-500">Total Teman</div>
                     </div>
-                    @endfor
+                    <div class="border border-gray-100 rounded-lg p-4 text-center">
+                        <div class="text-3xl font-bold text-green-600">{{ $pendingInvitations->count() }}</div>
+                        <div class="text-sm text-gray-500">Undangan Masuk</div>
+                    </div>
+                    <div class="border border-gray-100 rounded-lg p-4 text-center">
+                        <div class="text-3xl font-bold text-purple-600">{{ $sentInvitations ?? 0 }}</div>
+                        <div class="text-sm text-gray-500">Undangan Terkirim</div>
+                    </div>
+                    <div class="border border-gray-100 rounded-lg p-4 text-center">
+                        <div class="text-3xl font-bold text-orange-600">{{ $newFriendsThisMonth ?? 0 }}</div>
+                        <div class="text-sm text-gray-500">Teman Baru Bulan Ini</div>
+                    </div>
                 </div>
             </div>
         </div>

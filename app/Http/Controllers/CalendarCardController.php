@@ -6,26 +6,35 @@ use App\Models\Task;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
+use Illuminate\View\View;
 
 class CalendarCardController extends Controller
 {
-    public function index()
-    {
+    public function index(): View {
         $user = Auth::user();
-
-        // Ambil tugas yang dimiliki (owned) dan yang diikutinya (member), pastikan deadline tidak null
-        $ownedTasks = $user->ownedTasks()->whereNotNull('deadline')->get();
-        $memberTasks = $user->tasks()->whereNotNull('deadline')->get();
-        $tasks = $ownedTasks->merge($memberTasks)->sortBy('deadline');
-
+    
+        // Ambil semua tugas yang memiliki deadline (tidak null)
+        // dan yang dibuat oleh user atau yang memiliki relasi di pivot (task_user)
+        $tasks = Task::whereNotNull('deadline')
+            ->where(function ($query) use ($user) {
+                $query->where('user_id', $user->id)
+                      ->orWhereHas('users', function ($q) use ($user) {
+                          $q->where('user_id', $user->id);
+                      });
+            })
+            ->get()
+            ->sortBy('deadline');
+    
+        // Mapping event sesuai dengan FullCalendar
         $events = $tasks->map(function ($task) {
             $color = match ($task->priority) {
                 'high'   => '#dc3545',  // Merah
                 'medium' => '#ffc107',  // Kuning
                 default  => '#198754',  // Hijau
             };
-
+    
             return [
+                'id'    => $task->id,
                 'title' => $task->title,
                 'start' => $task->deadline->format('Y-m-d H:i:s'),
                 'color' => $color,
@@ -36,7 +45,7 @@ class CalendarCardController extends Controller
                 ],
             ];
         });
-
+    
         return view('dashboard', compact('events'));
     }
-}
+}    

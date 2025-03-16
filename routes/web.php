@@ -50,18 +50,26 @@ Route::middleware(['auth'])->group(function () {
     Route::get('friends', [FriendController::class, 'index'])->name('friends.index');
     Route::post('friends/{invitation}/accept', [FriendController::class, 'accept'])->name('friends.accept');
     Route::delete('friends/{invitation}/reject', [FriendController::class, 'reject'])->name('friends.reject');
-    
-
+    Route::get('/change-locale/{locale}', function ($locale) {
+     if (in_array($locale, ['en', 'id'])) {
+         session(['locale' => $locale]);
+     }
+     return redirect()->back();
+ })->name('locale.change');
+ 
+ 
+    Route::post('/tasks/{task}/complete', [TaskController::class, 'complete'])->name('tasks.complete');
     // Subtasks (nested di dalam task)
     Route::post('/tasks/{task}/subtasks', [SubtaskController::class, 'store'])
          ->name('subtasks.store');
     Route::patch('/subtasks/{subtask}', [SubtaskController::class, 'update'])
          ->name('subtasks.update');
-     
+    Route::get('/arsip', [TaskController::class, 'archivedTasks'])->name('archive.index');
     // Calendar
     Route::get('/calendar', [CalendarController::class, 'index'])
          ->name('calendar.index');
-
+         Route::resource('comments', CommentController::class);
+ 
     // Comments (nested route, agar task_id di-bind secara otomatis)
     Route::post('/tasks/{task}/comments', [CommentController::class, 'store'])
          ->name('comments.store');

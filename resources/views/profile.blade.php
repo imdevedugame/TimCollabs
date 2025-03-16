@@ -3,9 +3,22 @@
 @section('content')
 <!-- Header Section -->
 <header class="w-full bg-blue-600 text-white py-6">
-  <div class="container mx-auto px-4">
-    <h1 class="text-3xl font-bold">{{ __('Profile Settings') }}</h1>
-    <p class="mt-2 text-lg">{{ __('Manage your account settings and preferences') }}</p>
+  <div class="container mx-auto px-4 flex justify-between items-center">
+    <div>
+      <h1 class="text-3xl font-bold">{{ __('Profile Settings') }}</h1>
+      <p class="mt-2 text-lg">{{ __('Manage your account settings and preferences') }}</p>
+    </div>
+    <!-- Language Switcher -->
+    <div class="flex space-x-4">
+      <a href="{{ route('locale.change', ['locale' => 'en']) }}" 
+         class="px-3 py-1 rounded-md bg-white text-blue-600 font-semibold hover:bg-gray-200">
+         English
+      </a>
+      <a href="{{ route('locale.change', ['locale' => 'id']) }}" 
+         class="px-3 py-1 rounded-md bg-white text-blue-600 font-semibold hover:bg-gray-200">
+         Bahasa Indonesia
+      </a>
+    </div>
   </div>
 </header>
 

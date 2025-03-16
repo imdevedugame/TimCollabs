@@ -40,7 +40,8 @@ class Task extends Model
 
     /**
      * Relasi one-to-many untuk pemilik task.
-     * Setiap task dimiliki oleh satu user (owner).
+     * Setiap task dimiliki oleh satu user (
+     * er).
      */
     public function user()
     {

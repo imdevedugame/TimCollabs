@@ -22,6 +22,12 @@ class SubtaskController extends Controller
         return redirect()->route('tasks.show', $task->id)
                          ->with('success', 'Subtask berhasil ditambahkan.');
     }
+    public function destroy(Subtask $subtask)
+{
+    $subtask->delete();
+    return back()->with('success', 'Subtask berhasil dihapus.');
+}
+
 
     public function update(Request $request, Subtask $subtask)
     {

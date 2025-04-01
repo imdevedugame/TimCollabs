@@ -81,7 +81,7 @@ Route::middleware(['auth'])->group(function () {
          ->name('comments.update');
     Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])
          ->name('comments.destroy');
-
+         Route::delete('/subtasks/{subtask}', [SubtaskController::class, 'destroy'])->name('subtasks.destroy');
     // Atau, jika Anda ingin resource route untuk komentar yang global,
     // hapus route nested di atas dan gunakan:
     // Route::resource('comments', CommentController::class);

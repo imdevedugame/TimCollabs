@@ -5,6 +5,7 @@ use App\Http\Controllers\TaskController;
 use App\Http\Controllers\SubtaskController;
 use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\ProfileController;
 use App\Livewire\Actions\Logout;
 use Livewire\Volt\Volt;
 use App\Http\Controllers\LogoutController;
@@ -81,12 +82,13 @@ Route::middleware(['auth'])->group(function () {
          ->name('comments.update');
     Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])
          ->name('comments.destroy');
-         Route::delete('/subtasks/{subtask}', [SubtaskController::class, 'destroy'])->name('subtasks.destroy');
-    // Atau, jika Anda ingin resource route untuk komentar yang global,
-    // hapus route nested di atas dan gunakan:
-    // Route::resource('comments', CommentController::class);
-    // Namun, untuk kasus komentar yang selalu terkait dengan task,
-    // nested route lebih dianjurkan.
+    Route::delete('/subtasks/{subtask}', [SubtaskController::class, 'destroy'])->name('subtasks.destroy');
+    
+     Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
+Route::post('/profile/update', [ProfileController::class, 'updateProfile'])->name('profile.update');
+     Route::post('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
+Route::post('/profile/delete', [ProfileController::class, 'deleteAccount'])->name('profile.delete');
+
     Route::get('/logout', Logout::class)->name('logout');
     // Profile
     Route::post('/logout', LogoutController::class)->name('logout');

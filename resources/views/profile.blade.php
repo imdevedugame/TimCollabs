@@ -5,14 +5,14 @@
 <header class="w-full bg-blue-600 text-white py-6">
   <div class="container mx-auto px-4 flex justify-between items-center">
     <div>
-      <h1 class="text-3xl font-bold">{{ __('Profile Settings') }}</h1>
-      <p class="mt-2 text-lg">{{ __('Manage your account settings and preferences') }}</p>
+      <h1 class="text-3xl font-bold">{{ __('Pengaturan Profil') }}</h1>
+      <p class="mt-2 text-lg">{{ __('Kelola pengaturan akun dan preferensi Anda') }}</p>
     </div>
     <!-- Language Switcher -->
     <div class="flex space-x-4">
       <a href="{{ route('locale.change', ['locale' => 'en']) }}" 
          class="px-3 py-1 rounded-md bg-white text-blue-600 font-semibold hover:bg-gray-200">
-         English
+         Bahasa Inggris
       </a>
       <a href="{{ route('locale.change', ['locale' => 'id']) }}" 
          class="px-3 py-1 rounded-md bg-white text-blue-600 font-semibold hover:bg-gray-200">
@@ -33,21 +33,21 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
                     d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
             </svg>
-            {{ __('Profile Information') }}
+            {{ __('Informasi Profil') }}
           </a>
           <a href="#security" class="flex items-center px-3 py-2 text-sm font-medium rounded-md text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-gray-100">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
                     d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
             </svg>
-            {{ __('Security') }}
+            {{ __('Keamanan') }}
           </a>
           <a href="#danger" class="flex items-center px-3 py-2 text-sm font-medium rounded-md text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-gray-100">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
                     d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </svg>
-            {{ __('Danger Zone') }}
+            {{ __('Zona Bahaya') }}
           </a>
         </nav>
       </div>
@@ -55,12 +55,12 @@
       <!-- Profile Stats -->
       <div class="mt-6 bg-white dark:bg-gray-800 shadow sm:rounded-lg p-6">
         <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">
-          {{ __('Account Overview') }}
+          {{ __('Ikhtisar Akun') }}
         </h3>
         <dl class="mt-4 grid grid-cols-1 gap-4">
           <div class="bg-gray-50 dark:bg-gray-700/50 px-4 py-5 sm:rounded-lg sm:p-6">
             <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">
-              {{ __('Member Since') }}
+              {{ __('Anggota Sejak') }}
             </dt>
             <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">
               {{ auth()->user()->created_at->format('M d, Y') }}
@@ -68,7 +68,7 @@
           </div>
           <div class="bg-gray-50 dark:bg-gray-700/50 px-4 py-5 sm:rounded-lg sm:p-6">
             <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">
-              {{ __('Last Updated') }}
+              {{ __('Terakhir Diperbarui') }}
             </dt>
             <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">
               {{ auth()->user()->updated_at->diffForHumans() }}
